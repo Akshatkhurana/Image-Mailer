@@ -21,8 +21,11 @@ const ControlledInputs = () => {
       body: JSON.stringify({ key, email }),
     });
     console.log(response);
-    const data = await response.json();
-    console.log(data);
+    // const data = await response.json();
+    // console.log(data);
+    setKey("");
+    setEmail("");
+    console.log(key, email);
   };
   return (
     <form className="form" onSubmit={handleSubmit}>
