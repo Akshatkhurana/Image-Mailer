@@ -152,11 +152,11 @@ const transporter = nodemailer.createTransport({
 });
 
 app.post("/", (req, res) => {
-  const { key, email } = req.body;
-  console.log(`Received key: ${key}, email: ${email}`);
+  const { key, email, numImages } = req.body;
+  console.log(`Received key: ${key}, email: ${email}, ${numImages}`);
 
   const scriptPath = path.join(__dirname, "python.py");
-  const command = `python ${scriptPath} "${key}"`;
+  const command = `python ${scriptPath} ${key} ${numImages}`;
 
   console.log(`Executing command: ${command}`);
 
@@ -170,7 +170,18 @@ app.post("/", (req, res) => {
       return res.status(500).send({ Error: stderr });
     }
 
-    const zipPath = stdout.trim();
+
+    let result;
+    try {
+      result = JSON.parse(stdout.trim()); // Parsing JSON from Python script
+    } catch (parseError) {
+      console.log(`Parse Error: ${parseError.message}`);
+      return res.status(500).send({ Error: "Failed to parse Python script output" });
+    }
+
+    const { zip_path: zipPath, message } = result;
+
+    // const zipPath = stdout.trim();
     console.log(`Zip file created at: ${zipPath}`);
 
     const mailOptions = {
@@ -191,7 +202,7 @@ app.post("/", (req, res) => {
         return res.status(500).send({ Error: error.message });
       }
       console.log("Message sent: %s", info.messageId);
-      res.send("Images sent successfully");
+      res.send({message: message || "Images sent successfully"});
     });
   });
 });

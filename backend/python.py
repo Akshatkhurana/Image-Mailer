@@ -151,8 +151,12 @@ from io import BytesIO
 import os
 import sys
 import zipfile
-
-def download_images(query, num_images=5):
+import json
+def download_images(query, num_images):
+    message = None
+    if num_images > 15:
+        num_images = 15
+        message = "You can download a maximum of 15 images."
     query = query.replace(' ', '+')
     url = f"https://www.google.com/search?hl=en&tbm=isch&q={query}"
     headers = {"User-Agent": "Mozilla/5.0"}
@@ -188,10 +192,12 @@ def download_images(query, num_images=5):
         os.remove(os.path.join('downloaded_images', file))
     os.rmdir('downloaded_images')
 
-    return os.path.abspath(zip_filename)
-
+    result = {
+        "zip_path": os.path.abspath(zip_filename),
+        "message": message
+    }
+    print(json.dumps(result))
 if __name__ == "__main__":
     keyword = sys.argv[1]
-    num_images = 5
-    zip_path = download_images(keyword, num_images)
-    print(zip_path)
+    num_images = int(sys.argv[2])
+    result = download_images(keyword, num_images)
