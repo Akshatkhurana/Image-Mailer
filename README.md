@@ -48,7 +48,7 @@ Make sure you have the following installed:
    npm start
    ```
 
-![Alt Text](https://drive.google.com/file/d/1i6MOuMIqiNYYTi3cp7IFcDtcwE3YqCzA/view?usp=drive_link)
+![Alt Text](https://drive.google.com/file/d/1i6MOuMIqiNYYTi3cp7IFcDtcwE3YqCzA/view?usp=sharing)
 
 
 ## Usage
