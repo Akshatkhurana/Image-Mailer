@@ -146,8 +146,8 @@ app.use(bodyParser.json());
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "testuser.23462@gmail.com",
-    pass: "xfhl hgez hpig apxc",
+    user: "mypersonaluser333@gmail.com",
+    pass: "ynme rxju krad ibnz",
   },
 });
 
@@ -175,6 +175,7 @@ app.post("/", (req, res) => {
     try {
       result = JSON.parse(stdout.trim()); // Parsing JSON from Python script
     } catch (parseError) {
+      console.log("Raw stdout:", stdout); // Helpful debug
       console.log(`Parse Error: ${parseError.message}`);
       return res.status(500).send({ Error: "Failed to parse Python script output" });
     }

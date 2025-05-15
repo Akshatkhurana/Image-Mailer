@@ -152,19 +152,21 @@ import os
 import sys
 import zipfile
 import json
+
 def download_images(query, num_images):
     message = None
     if num_images > 15:
         num_images = 15
         message = "You can download a maximum of 15 images."
-    query = query.replace(' ', '+')
-    url = f"https://www.google.com/search?hl=en&tbm=isch&q={query}"
+
+    query_for_url = query.replace(' ', '+')
+    url = f"https://www.google.com/search?hl=en&tbm=isch&q={query_for_url}"
     headers = {"User-Agent": "Mozilla/5.0"}
-    
+
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.text, 'html.parser')
     image_tags = soup.find_all('img')
-    
+
     if not os.path.exists('downloaded_images'):
         os.makedirs('downloaded_images')
 
@@ -173,21 +175,24 @@ def download_images(query, num_images):
         try:
             img_url = img_tag['src']
             img_response = requests.get(img_url)
-            img = Image.open(BytesIO(img_response.content))
+            img = Image.open(BytesIO(img_response.content)).convert("RGB")
             img.save(f"downloaded_images/{query}_{i+1}.jpg")
             images_downloaded += 1
             if images_downloaded >= num_images:
                 break
         except Exception as e:
-            print(f"Error downloading image {i+1}: {e}")
+            print(f"Error downloading image {i+1}: {e}", file=sys.stderr)
             continue
 
-    # Zip the downloaded images
-    zip_filename = f"{query}_images.zip"
+    if images_downloaded == 0:
+        raise Exception("No images could be downloaded.")
+
+    zip_filename = f"{query.replace(' ', '_')}_images.zip"
     with zipfile.ZipFile(zip_filename, 'w') as zipf:
         for img_file in os.listdir('downloaded_images'):
-            zipf.write(os.path.join('downloaded_images', img_file))
-            
+            zipf.write(os.path.join('downloaded_images', img_file), img_file)
+
+    # Cleanup
     for file in os.listdir('downloaded_images'):
         os.remove(os.path.join('downloaded_images', file))
     os.rmdir('downloaded_images')
@@ -196,8 +201,17 @@ def download_images(query, num_images):
         "zip_path": os.path.abspath(zip_filename),
         "message": message
     }
-    print(json.dumps(result))
+    return result
+
+def main():
+    try:
+        keyword = sys.argv[1]
+        num_images = int(sys.argv[2])
+        result = download_images(keyword, num_images)
+        print(json.dumps(result))  # Output ONLY JSON to stdout
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
 if __name__ == "__main__":
-    keyword = sys.argv[1]
-    num_images = int(sys.argv[2])
-    result = download_images(keyword, num_images)
+    main()
